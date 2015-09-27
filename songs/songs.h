@@ -5,11 +5,12 @@
  *      Author: nhtranngoc
  */
 
-#ifndef UNDERWATER_H_
-#define UNDERWATER_H_
+#ifndef SONGS_H_
+#define SONGS_H_
 
 #include "sound.h"
 
-void playSong();
+void playSongUnderwater();
+void playSongTotoro();
 
-#endif /* UNDERWATER_H_ */
+#endif /* SONGS_H_ */

@@ -4,9 +4,9 @@
  *  Created on: Sep 27, 2015
  *      Author: nhtranngoc
  */
-#include "underwater.h"
+#include "songs.h"
 
-void playSong(){
+void playSongUnderwater(){
 	setTickDur(72*6);
 
 	play(NOTE_D4, 4);
