@@ -15,8 +15,10 @@
 #include "peripherals.h"
 //#include "prelab.h"
 
-int count=0;
+int msCount=0;
 int secLeft=3;
+int sec=0;
+int leap=0;
 
 //Enumerate gameState as a type.
 enum gameState {
@@ -28,15 +30,17 @@ enum gameState {
 	LOSE
 };
 
-
 // Function prototypes for this file
 void swDelay(char numLoops);
 void countdown(int sec);
 void initInterrupt();
 void configLED();
-void flashLEDs(secLeft);
+void flashLEDs(int secLeft);
 
 enum gameState state=WELCOME;
+
+//extern volatile unsigned int ms_elapsed = 0;
+
 
 void main(void){
     WDTCTL = WDTPW | WDTHOLD;		// Stop watchdog timer
@@ -46,9 +50,7 @@ void main(void){
     configDisplay();
     configCapButtons();
     configButtons();
-
-    int out;
-    char debugOut ='A';
+    setTickDur(72);
 
 	 while(1){
 		 if(buttonRead()== 2){
@@ -72,33 +74,23 @@ void main(void){
 				    GrFlush(&g_sContext);
 				    // Refresh the display now that we have finished writing to it
 				    //Check for keypress on s1
-//				    while(buttonRead() == 0){} //Do nothing and wait. And wait.
-//				    	P1OUT &= ~(buttonRead() << 1);
-				    	if(buttonRead() == 1){ //When button is pressed
-				    		secLeft = 3;
-				    		while(secLeft >=0){
-				    			countdown(secLeft);
-				    			flashLEDs(secLeft);
-				    		}
-				    		GrClearDisplay(&g_sContext);
-				    		GrFlush(&g_sContext);
-
-//////				    		clickSound();
-//				    		GrClearDisplay(&g_sContext);
-//						    GrStringDrawCentered(&g_sContext, "A", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
-//						    GrFlush(&g_sContext);
-//////				    		countdown();
-//				    		P1OUT |= (LED4+LED5+LED6+LED7+LED8);   // turn on all 5 LEDs
+				    if(buttonRead() == 1){ //When button is pressed
+				    	int currentSec = sec; //Grab the current snapshot of sec and store it in a variable
+				    	int secPassed=0;
+				    	while(secPassed <= 3){
+				    		secPassed= sec - currentSec;
+				    		countdown(3-secPassed);
+				    	} //Extremely convoluted way to countdown without slowing down timer interrupt function. There must be a better way!
+				    	GrClearDisplay(&g_sContext);
+				    	GrFlush(&g_sContext);
 			    		state=GAME_INIT;
-				    		break;
-				    	}
-//				    }
-					break;
+			    		break;
+				    }
+				    break;
 
 				case GAME_INIT:
-					playBuzzer(NOTE_A4);
-					swDelay(4);
-					BuzzerOff();
+					play(NOTE_A4, 1);
+//					BuzzerOff();
 //				    GrFlush(&g_sContext);
 					state=WELCOME;
 					break;
@@ -107,23 +99,28 @@ void main(void){
 }
 
 void countdown(int sec){
-	//THIS IS NOT THE RIGHT WAY TO DO IT.
+	//THIS IS NOT THE RIGHT WAY TO DO IT. (Oh well).
 	GrClearDisplay(&g_sContext);
-	if (sec == 3) {
+	switch(sec){
+	case(3):
 		GrStringDrawCentered(&g_sContext, "3", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
-	}
-	if (sec == 2) {
+		flashLEDs(3);
+		break;
+	case(2):
 		GrStringDrawCentered(&g_sContext, "2", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
-	}
-	if (sec == 1) {
+		flashLEDs(2);
+		break;
+	case(1):
 		GrStringDrawCentered(&g_sContext, "1", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
-	}
-	if (sec == 0) {
+		flashLEDs(1);
+		break;
+	case(0):
 		GrStringDrawCentered(&g_sContext, "GO!", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
+		flashLEDs(0);
+		break;
 	}
 	GrFlush(&g_sContext);
 }
-
 
 void swDelay(char numLoops)
 {
@@ -152,13 +149,13 @@ void flashLEDs(secLeft){
 	P8OUT &= 0xF9;
 
 	switch(secLeft){
-		case 3:
+		case 1:
 			P1OUT |= 0x01;
 			break;
 		case 2:
 			P8OUT |= 0x02;
 			break;
-		case 1:
+		case 3:
 			P8OUT |= 0x04;
 			break;
 		case 0:
@@ -169,8 +166,8 @@ void flashLEDs(secLeft){
 }
 
 /**
- * @brief Initializing timer interrupt, setting the ticks at 327, which means the timer would
- * be called every 0.01 seconds
+ * @brief Initializing timer interrupt, setting the ticks at 32, which means the timer would
+ * be called every 0.001 seconds
  */
 void initInterrupt(){
 	TA2CTL= TASSEL_1 + ID_1 + MC_1; //General settings: Use ACLK, Divider =1, UP mode
@@ -182,28 +179,23 @@ void initInterrupt(){
 
 /*
  * @brief Timer interrupt function
- * Every 0.01 second, tenMillisecLeft would be decreased by 10.
+ * Every 0.001 sec, msCount would would be increased by 1.
  */
-#pragma vector= TIMER2_A0_VECTOR //Timer interrupt to get the aliens to go down
+#pragma vector= TIMER2_A0_VECTOR //Timer interrupt
 __interrupt void Timer_A2_ISR(void){
-	int millisec;
-	count++;
-
-//	if(count % )
-
-	millisec--;
-
-	if(millisec % 556){
-
+	if (leap < 141){
+		msCount++;
+		leap++;
+	} else {
+		msCount+=2;
+		leap=0;
 	}
 
-	if(millisec<=0){
-		secLeft--;
-
-		//@TODO: Implement leap handler.
-		millisec=600;
+	if(msCount % 500 == 0){ //@TODO: Figure out why 1000 doesn't give exact time.
+		sec++;
 	}
 
+	ms_elapsed++;
 
 }
 

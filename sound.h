@@ -103,8 +103,42 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
+/* The number of milliseconds to kill the note before the duration expires.
+ * This leaves a nice gap between back-to-back notes. */
+#define DEAD_TIME_MS 20
+
+/* Assuming 4/4 time, this is how many ticks we subdivide the beat into. So
+ * in other words, 4 ticks per beat gives us 16th note resolution. We then
+ * define all note durations in lengths of these 16th note "ticks". */
+#define TICKS_PER_BEAT 4
+
+/* Turns the sound output on or off. */
+
+/* Keeps track of the current note we're playing. */
+extern volatile unsigned int current_note;
+
+/* Keeps track of the number of ms elapsed. */
+extern volatile unsigned int ms_elapsed;
+
+/*
+ * Sets the tempo in BPM (beats per minute) at which the music will play back.
+ */
+void setTickDur(unsigned int bpm);
+
+/*
+ * Plays the passed note for the given duration (in ticks, see TICKS PER BEAT).
+ * Blocks until the note is over.
+ */
+void play(unsigned int note, unsigned int duration_ticks);
+
+/*
+ * Rests for the given duration. Exactly the same as playing, except we just
+ * don't play a note for the duration.
+ */
+void rest(unsigned int duration_ticks);
 
 void playBuzzer(int freq);
+void playBuzzer2();
 void introSound();
 void clickSound();
 void swDelay(char numLoops);
