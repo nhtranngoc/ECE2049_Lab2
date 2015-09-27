@@ -7,6 +7,7 @@
 #include "grlib.h"
 #include "LcdDriver/Dogs102x64_UC1701.h"
 #include "sound.h"
+#include "songs/underwater.h"
 /* Peripherals.c and .h are where the functions that implement
  * the LEDs and cap touch buttons are implemented. It is useful
  * to organize your code by putting like functions together in
@@ -89,8 +90,7 @@ void main(void){
 				    break;
 
 				case GAME_INIT:
-					play(NOTE_A4, 1);
-//					BuzzerOff();
+					playSong();
 //				    GrFlush(&g_sContext);
 					state=WELCOME;
 					break;
