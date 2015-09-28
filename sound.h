@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 //Define note frequencies
+typedef uint8_t note;
 #define NOTE_B0  31
 #define NOTE_C1  33
 #define NOTE_CS1 35
@@ -103,6 +104,9 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
+
+
+
 /* The number of milliseconds to kill the note before the duration expires.
  * This leaves a nice gap between back-to-back notes. */
 #define DEAD_TIME_MS 20
@@ -119,6 +123,13 @@ extern volatile unsigned int current_note;
 
 /* Keeps track of the number of ms elapsed. */
 extern volatile unsigned int ms_elapsed;
+
+//void ledOn(int noteKey);
+//void checkKeyPad(int noteKey);
+
+
+static void capLEDOn(int ledNum);
+static void capLEDOff();
 
 /*
  * Sets the tempo in BPM (beats per minute) at which the music will play back.

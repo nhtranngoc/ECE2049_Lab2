@@ -20,6 +20,7 @@ int msCount=0;
 int secLeft=3;
 int sec=0;
 int leap=0;
+unsigned int score=0;
 
 //Enumerate gameState as a type.
 enum gameState {
@@ -90,7 +91,13 @@ void main(void){
 				    break;
 
 				case GAME_INIT:
-					playSongTotoro();
+					//turn off LEDs
+					P1OUT &= 0xFE;
+					P8OUT &= 0xF9;
+
+//					playSongTotoro();
+					playSongUnderwater();
+
 //				    GrFlush(&g_sContext);
 					state=WELCOME;
 					break;
@@ -165,6 +172,31 @@ void flashLEDs(secLeft){
 	}
 }
 
+
+/**
+ * @brief A function to check the capacitive buttons and return appropriate numbers
+ * @return -1 if no buttons are pressed, 0 for X button, 1 for Square button, 2 for Octogon button,
+ * 3 for Triangle button, and 4 for Circle button
+ *
+ */
+
+int checkButton(){
+	switch(CapButtonRead()){
+		case NONE_BUTTON:
+			return -1;
+		case X_BUTTON:
+			return 0;
+		case SQ_BUTTON:
+			return 1;
+		case OCT_BUTTON:
+			return 2;
+		case TRI_BUTTON:
+			return 3;
+		case CIR_BUTTON:
+			return 4;
+	}
+}
+
 /**
  * @brief Initializing timer interrupt, setting the ticks at 32, which means the timer would
  * be called every 0.001 seconds
@@ -197,6 +229,6 @@ __interrupt void Timer_A2_ISR(void){
 
 	ms_elapsed++;
 
-	if()
+	//if()
 }
 

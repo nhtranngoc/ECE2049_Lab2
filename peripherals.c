@@ -96,7 +96,7 @@ void configCapButtons(void)
 CAP_BUTTON CapButtonRead(void)
 {
 	int i;
-	CAP_BUTTON ret = BUTTON_NONE;
+	CAP_BUTTON ret = NONE_BUTTON;
 
 	// Check cap touch keys
 	// This function returns an element in address_list matching the pressed key.

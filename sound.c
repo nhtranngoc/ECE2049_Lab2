@@ -10,7 +10,7 @@
 
 
 
-/* Some resonable defaults. */
+/* Some reasonable defaults. */
 volatile unsigned int current_note = NOTE_A4;
 volatile unsigned int ms_elapsed = 0;
 
@@ -37,11 +37,41 @@ void play(unsigned int note, unsigned int duration_ticks) {
     /* Wait for the note duration to expire. */
     while (ms_elapsed < duration_ms - DEAD_TIME_MS){
     	playBuzzer(current_note);
+    	//@TODO define capLEDOn, checkKeyPad, score.
+    	int enumNote = current_note % 5; //Turns all notes to one of five positions- depending on its frequency.
+    	capLEDOn(enumNote); //Turn on LED at that particular position.
+//    	score += checkKeyPad(enumNote); //Returns 0 if doesn't hit right key press- Award some points otherwise.
     }
     BuzzerOff();
+	capLEDOff();
 
     /* Wait for the full duration to expire. */
     while (ms_elapsed < duration_ms);
+}
+
+static void capLEDOn(int ledNum){
+	capLEDOff();
+	switch(ledNum){
+	case 0:
+		P1OUT |= BIT1;
+		break;
+	case 1:
+		P1OUT |= BIT2;
+		break;
+	case 2:
+		P1OUT |= BIT3;
+		break;
+	case 3:
+		P1OUT |= BIT4;
+		break;
+	case 4:
+		P1OUT |= BIT5;
+		break;
+	}
+}
+
+static void capLEDOff(){
+	P1OUT &= ~(BIT1|BIT2|BIT3|BIT4|BIT5);
 }
 
 void rest(unsigned int duration_ticks) {

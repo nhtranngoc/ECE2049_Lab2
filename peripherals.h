@@ -25,15 +25,22 @@
 #define LED8		BIT1
 
 
+
 // You may find it useful to define a new type for representing the
 // capacitive buttons. Since we have fewer than 8 buttons, we can use
 // a char which will allow one bit to represent the state of each button.
 // Which corresponds to which button?  Find out using the debugger and
 // write #define statements for each button
 typedef uint8_t CAP_BUTTON;
+#define NONE_BUTTON 0x00 // No buttons pressed
+#define X_BUTTON    0x01
+#define SQ_BUTTON   0x02
+#define OCT_BUTTON  0x04
+#define TRI_BUTTON  0x08
+#define CIR_BUTTON  0x10
 
-#define BUTTON_NONE 0x00   // No buttons pressed
 // Add definitions here...
+
 
 
 // Globals
