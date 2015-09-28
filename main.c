@@ -20,7 +20,8 @@ int msCount=0;
 int secLeft=3;
 int sec=0;
 int leap=0;
-unsigned int score=0;
+int score=0;
+char scoreStr[10];
 
 //Enumerate gameState as a type.
 enum gameState {
@@ -28,6 +29,7 @@ enum gameState {
 	MENU,
 	GAME_INIT,
 	CHECK_BUTTON,
+	GAME_END,
 	WIN,
 	LOSE
 };
@@ -38,6 +40,7 @@ void countdown(int sec);
 void initInterrupt();
 void configLED();
 void flashLEDs(int secLeft);
+char* itoa(int i, char b[]);
 
 enum gameState state=WELCOME;
 
@@ -76,6 +79,7 @@ void main(void){
 				    GrFlush(&g_sContext);
 				    // Refresh the display now that we have finished writing to it
 				    //Check for keypress on s1
+				    while(buttonRead()){
 				    if(buttonRead() == 1){ //When button is pressed
 				    	int currentSec = sec; //Grab the current snapshot of sec and store it in a variable
 				    	int secPassed=0;
@@ -88,21 +92,55 @@ void main(void){
 			    		state=GAME_INIT;
 			    		break;
 				    }
+				    }
 				    break;
 
 				case GAME_INIT:
 					//turn off LEDs
 					P1OUT &= 0xFE;
 					P8OUT &= 0xF9;
-
-//					playSongTotoro();
-					playSongUnderwater();
-
+					playSongTotoro();
+//					playSongUnderwate r();
 //				    GrFlush(&g_sContext);
-					state=WELCOME;
+					state=GAME_END;
 					break;
+
+				case GAME_END:
+					GrStringDrawCentered(&g_sContext, "Your score is: ", AUTO_STRING_LENGTH, 51, 8, TRANSPARENT_TEXT);
+				    GrStringDrawCentered(&g_sContext, (itoa(score, scoreStr)), AUTO_STRING_LENGTH, 51, 28, TRANSPARENT_TEXT);
+//				    writeHumiliation(int score);
+				    GrStringDrawCentered(&g_sContext, "Press S1 to restart", AUTO_STRING_LENGTH, 51, 50, TRANSPARENT_TEXT);
+				    GrFlush(&g_sContext);
+				    while(buttonRead()){
+				    	if(buttonRead() == 1){ //When button is pressed
+				    		state=WELCOME;
+				    		}
+				    	break;
+				    }
+					break;
+
 			}
 	 }
+}
+
+char* itoa(int i, char b[]){
+    char const digit[] = "0123456789";
+    char* p = b;
+    if(i<0){
+        *p++ = '-';
+        i *= -1;
+    }
+    int shifter = i;
+    do{ //Move to where representation ends
+        ++p;
+        shifter = shifter/10;
+    }while(shifter);
+    *p = '\0';
+    do{ //Move back, inserting digits as u go
+        *--p = digit[i%10];
+        i = i/10;
+    }while(i);
+    return b;
 }
 
 void countdown(int sec){
@@ -169,31 +207,6 @@ void flashLEDs(secLeft){
 			P1OUT |= 0x01;
 			P8OUT |= 0x06;
 			break;
-	}
-}
-
-
-/**
- * @brief A function to check the capacitive buttons and return appropriate numbers
- * @return -1 if no buttons are pressed, 0 for X button, 1 for Square button, 2 for Octogon button,
- * 3 for Triangle button, and 4 for Circle button
- *
- */
-
-int checkButton(){
-	switch(CapButtonRead()){
-		case NONE_BUTTON:
-			return -1;
-		case X_BUTTON:
-			return 0;
-		case SQ_BUTTON:
-			return 1;
-		case OCT_BUTTON:
-			return 2;
-		case TRI_BUTTON:
-			return 3;
-		case CIR_BUTTON:
-			return 4;
 	}
 }
 

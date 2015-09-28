@@ -40,13 +40,51 @@ void play(unsigned int note, unsigned int duration_ticks) {
     	//@TODO define capLEDOn, checkKeyPad, score.
     	int enumNote = current_note % 5; //Turns all notes to one of five positions- depending on its frequency.
     	capLEDOn(enumNote); //Turn on LED at that particular position.
-//    	score += checkKeyPad(enumNote); //Returns 0 if doesn't hit right key press- Award some points otherwise.
+    	score += checkKeyPad(enumNote, duration_ms); //Returns 0 if doesn't hit right key press- Award some points otherwise.
     }
     BuzzerOff();
 	capLEDOff();
+	P1OUT &= 0xFE;
+	P8OUT &= 0xF9;
 
     /* Wait for the full duration to expire. */
     while (ms_elapsed < duration_ms);
+}
+
+/**
+ * @brief A function to check the capacitive buttons and return appropriate numbers
+ * @return -1 if no buttons are pressed, 0 for X button, 1 for Square button, 2 for Octogon button,
+ * 3 for Triangle button, and 4 for Circle button
+ *
+ */
+
+int checkButton(){
+	switch(CapButtonRead()){
+		case NONE_BUTTON:
+			return -1;
+		case X_BUTTON:
+			return 0;
+		case SQ_BUTTON:
+			return 1;
+		case OCT_BUTTON:
+			return 2;
+		case TRI_BUTTON:
+			return 3;
+		case CIR_BUTTON:
+			return 4;
+	}
+	return -1;
+}
+
+
+static int checkKeyPad(int keyPad, int dur){
+	int point = 0;
+	if (keyPad == checkButton()){
+		P1OUT |= 0x01;
+		P8OUT |= 0x06;
+		point = dur;
+	}
+	return point;
 }
 
 static void capLEDOn(int ledNum){

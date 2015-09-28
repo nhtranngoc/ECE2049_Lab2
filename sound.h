@@ -11,6 +11,8 @@
 
 #include <msp430.h>
 #include <stdint.h>
+#include "CTS_Layer.h"
+#include "peripherals.h"
 
 //Define note frequencies
 typedef uint8_t note;
@@ -124,12 +126,16 @@ extern volatile unsigned int current_note;
 /* Keeps track of the number of ms elapsed. */
 extern volatile unsigned int ms_elapsed;
 
+extern int score;
+
 //void ledOn(int noteKey);
 //void checkKeyPad(int noteKey);
 
 
 static void capLEDOn(int ledNum);
 static void capLEDOff();
+int checkButton();
+static int checkKeyPad(int keyPad, int dur);
 
 /*
  * Sets the tempo in BPM (beats per minute) at which the music will play back.
