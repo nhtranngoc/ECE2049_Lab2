@@ -102,11 +102,28 @@ void main(void){
 			//turn off LEDs
 			P1OUT &= 0xFE;
 			P8OUT &= 0xF9;
-			//					playSongTotoro();
-			playSongUnderwater();
-			state=GAME_END;
+			GrClearDisplay(&g_sContext);
+			GrStringDrawCentered(&g_sContext, "X: Totoro Theme", AUTO_STRING_LENGTH, 51, 15, TRANSPARENT_TEXT);
+			GrStringDrawCentered(&g_sContext, "S:   Mario Song", AUTO_STRING_LENGTH, 51, 45, TRANSPARENT_TEXT);
+			GrFlush(&g_sContext);
 
-			break;
+			P1OUT |= BIT1 | BIT2;
+
+		    while(checkButton() == NONE_BUTTON){ //Do nothing and wait. And wait.
+		    	switch(checkButton()){
+		    	case 0:
+		    		P1OUT &= ~(BIT1|BIT2|BIT3|BIT4|BIT5);
+		    		playSongTotoro();
+		    		state=GAME_END;
+		    		break;
+		    	case 1:
+		    		P1OUT &= ~(BIT1|BIT2|BIT3|BIT4|BIT5);
+		    		playSongUnderwater();
+		    		state=GAME_END;
+		    		break;
+		    	}
+		    }
+		    break;
 
 		case GAME_END:
 
