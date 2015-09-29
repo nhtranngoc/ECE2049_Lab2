@@ -13,7 +13,9 @@
 #include <stdint.h>
 #include "CTS_Layer.h"
 #include "peripherals.h"
-
+#include "CTS_Layer.h"
+#include "grlib.h"
+#include "LcdDriver/Dogs102x64_UC1701.h"
 //Define note frequencies
 typedef uint8_t note;
 #define NOTE_B0  31
@@ -121,12 +123,15 @@ typedef uint8_t note;
 /* Turns the sound output on or off. */
 
 /* Keeps track of the current note we're playing. */
-extern volatile unsigned int current_note;
+extern volatile unsigned int currentNote;
 
 /* Keeps track of the number of ms elapsed. */
-extern volatile unsigned int ms_elapsed;
+extern volatile unsigned int msElapsed;
 
 extern int score;
+extern int total;
+extern char scoreStr[10];
+extern int percentage;
 
 //void ledOn(int noteKey);
 //void checkKeyPad(int noteKey);
@@ -135,7 +140,9 @@ extern int score;
 static void capLEDOn(int ledNum);
 static void capLEDOff();
 int checkButton();
-static int checkKeyPad(int keyPad, int dur);
+static void checkKeyPad(int keyPad, int dur);
+char* itoa(int i, char b[]);
+
 
 /*
  * Sets the tempo in BPM (beats per minute) at which the music will play back.

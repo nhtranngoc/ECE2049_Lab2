@@ -21,7 +21,11 @@ int secLeft=3;
 int sec=0;
 int leap=0;
 int score=0;
+int percentage=0;
+int total = 0;
+int stateFlag=0;
 char scoreStr[10];
+char percentageStr[10];
 
 //Enumerate gameState as a type.
 enum gameState {
@@ -30,8 +34,6 @@ enum gameState {
 	GAME_INIT,
 	CHECK_BUTTON,
 	GAME_END,
-	WIN,
-	LOSE
 };
 
 // Function prototypes for this file
@@ -40,107 +42,93 @@ void countdown(int sec);
 void initInterrupt();
 void configLED();
 void flashLEDs(int secLeft);
-char* itoa(int i, char b[]);
 
 enum gameState state=WELCOME;
 
-//extern volatile unsigned int ms_elapsed = 0;
-
-
 void main(void){
-    WDTCTL = WDTPW | WDTHOLD;		// Stop watchdog timer
+	WDTCTL = WDTPW | WDTHOLD;		// Stop watchdog timer
 
-    configLED();
-    configTouchPadLEDs();
-    configDisplay();
-    configCapButtons();
-    configButtons();
-    setTickDur(72);
+	configLED();
+	configTouchPadLEDs();
+	configDisplay();
+	configCapButtons();
+	configButtons();
+	setTickDur(72);
 
-	 while(1){
-		 if(buttonRead()== 2){
-			 state=WELCOME;
-		 }
-			switch(state){
-				case WELCOME:
-					initInterrupt();
-//					clrScr();
+	while(1){
+		if(buttonRead() == 2){ //When button is pressed
+			state = WELCOME;
+		}
+		switch(state){
+		case WELCOME:
+			stateFlag=0;
+			percentage=0;
+			score=0;
+			total=0;
+
+			initInterrupt();
+			GrClearDisplay(&g_sContext);
+			GrFlush(&g_sContext);
+			// Intro Screen -- Write to the display screen
+			GrStringDrawCentered(&g_sContext, "GUITAR HERO", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
+			// Refresh the display now that we have finished writing to it
+			GrFlush(&g_sContext);
+			state=MENU;
+			break;
+
+		case MENU:
+			GrStringDrawCentered(&g_sContext, "Press S1 to Start", AUTO_STRING_LENGTH, 51, 50, TRANSPARENT_TEXT);
+			GrFlush(&g_sContext);
+			// Refresh the display now that we have finished writing to it
+			while(buttonRead()){
+				if(buttonRead() == 1){ //When button S1 is pressed
+					int currentSec = sec; //Grab the current snapshot of sec and store it in a variable
+					int secPassed=0;
+					while(secPassed <= 3){
+						secPassed= sec - currentSec;
+						countdown(3-secPassed);
+						state=GAME_INIT;
+					} //Extremely convoluted way to countdown without slowing down timer interrupt function. There must be a better way!
+					GrClearDisplay(&g_sContext);
 					GrFlush(&g_sContext);
-				    // Intro Screen -- Write to the display screen
-				    GrStringDrawCentered(&g_sContext, "GUITAR HERO", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
-				    // Refresh the display now that we have finished writing to it
-				    GrFlush(&g_sContext);
-//				    introSound();
-					state=MENU;
+
 					break;
-
-				case MENU:
-				    GrStringDrawCentered(&g_sContext, "Press S1 to Start", AUTO_STRING_LENGTH, 51, 50, TRANSPARENT_TEXT);
-				    GrFlush(&g_sContext);
-				    // Refresh the display now that we have finished writing to it
-				    //Check for keypress on s1
-				    while(buttonRead()){
-				    if(buttonRead() == 1){ //When button is pressed
-				    	int currentSec = sec; //Grab the current snapshot of sec and store it in a variable
-				    	int secPassed=0;
-				    	while(secPassed <= 3){
-				    		secPassed= sec - currentSec;
-				    		countdown(3-secPassed);
-				    	} //Extremely convoluted way to countdown without slowing down timer interrupt function. There must be a better way!
-				    	GrClearDisplay(&g_sContext);
-				    	GrFlush(&g_sContext);
-			    		state=GAME_INIT;
-			    		break;
-				    }
-				    }
-				    break;
-
-				case GAME_INIT:
-					//turn off LEDs
-					P1OUT &= 0xFE;
-					P8OUT &= 0xF9;
-					playSongTotoro();
-//					playSongUnderwate r();
-//				    GrFlush(&g_sContext);
-					state=GAME_END;
-					break;
-
-				case GAME_END:
-					GrStringDrawCentered(&g_sContext, "Your score is: ", AUTO_STRING_LENGTH, 51, 8, TRANSPARENT_TEXT);
-				    GrStringDrawCentered(&g_sContext, (itoa(score, scoreStr)), AUTO_STRING_LENGTH, 51, 28, TRANSPARENT_TEXT);
-//				    writeHumiliation(int score);
-				    GrStringDrawCentered(&g_sContext, "Press S1 to restart", AUTO_STRING_LENGTH, 51, 50, TRANSPARENT_TEXT);
-				    GrFlush(&g_sContext);
-				    while(buttonRead()){
-				    	if(buttonRead() == 1){ //When button is pressed
-				    		state=WELCOME;
-				    		}
-				    	break;
-				    }
-					break;
-
+				}
 			}
-	 }
-}
+			break;
 
-char* itoa(int i, char b[]){
-    char const digit[] = "0123456789";
-    char* p = b;
-    if(i<0){
-        *p++ = '-';
-        i *= -1;
-    }
-    int shifter = i;
-    do{ //Move to where representation ends
-        ++p;
-        shifter = shifter/10;
-    }while(shifter);
-    *p = '\0';
-    do{ //Move back, inserting digits as u go
-        *--p = digit[i%10];
-        i = i/10;
-    }while(i);
-    return b;
+		case GAME_INIT:
+			//turn off LEDs
+			P1OUT &= 0xFE;
+			P8OUT &= 0xF9;
+			//					playSongTotoro();
+			playSongUnderwater();
+			state=GAME_END;
+
+			break;
+
+		case GAME_END:
+
+			GrClearDisplay(&g_sContext);
+			//Super simple humiliation and celebration.
+			if(score < total/2){
+				GrStringDrawCentered(&g_sContext, "You suck", AUTO_STRING_LENGTH, 51, 28, TRANSPARENT_TEXT);
+			} else
+				GrStringDrawCentered(&g_sContext, "Not bad. For you.", AUTO_STRING_LENGTH, 51, 28, TRANSPARENT_TEXT);
+			GrStringDrawCentered(&g_sContext, "Your score is: ", AUTO_STRING_LENGTH, 51, 8, TRANSPARENT_TEXT);
+			GrStringDrawCentered(&g_sContext, (itoa(score, scoreStr)), AUTO_STRING_LENGTH, 51, 18, TRANSPARENT_TEXT);
+			GrStringDrawCentered(&g_sContext, "S1 to Start Over", AUTO_STRING_LENGTH, 51, 50, TRANSPARENT_TEXT);
+			GrFlush(&g_sContext);
+			while(buttonRead()){
+				if(buttonRead() == 1){ //When button S2 is pressed
+					state=WELCOME;
+				}
+				break;
+			}
+			break;
+
+		}
+	}
 }
 
 void countdown(int sec){
@@ -150,42 +138,21 @@ void countdown(int sec){
 	case(3):
 		GrStringDrawCentered(&g_sContext, "3", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
 		flashLEDs(3);
-		break;
+	break;
 	case(2):
 		GrStringDrawCentered(&g_sContext, "2", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
 		flashLEDs(2);
-		break;
+	break;
 	case(1):
 		GrStringDrawCentered(&g_sContext, "1", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
 		flashLEDs(1);
-		break;
+	break;
 	case(0):
 		GrStringDrawCentered(&g_sContext, "GO!", AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
 		flashLEDs(0);
-		break;
+	break;
 	}
 	GrFlush(&g_sContext);
-}
-
-void swDelay(char numLoops)
-{
-	// This function is a software delay. It performs
-	// useless loops to waste a bit of time
-	//
-	// Input: numLoops = number of delay loops to execute
-	// Output: none
-	//
-	// smj, ECE2049, 25 Aug 2013
-
-	volatile unsigned int i,j;	// volatile to prevent optimization
-			                            // by compiler
-
-	for (j=0; j<numLoops; j++)
-    {
-    	i = 50000 ;					// SW Delay
-   	    while (i > 0)				// could also have used while (i)
-	       i--;
-    }
 }
 
 void flashLEDs(secLeft){
@@ -194,19 +161,19 @@ void flashLEDs(secLeft){
 	P8OUT &= 0xF9;
 
 	switch(secLeft){
-		case 1:
-			P1OUT |= 0x01;
-			break;
-		case 2:
-			P8OUT |= 0x02;
-			break;
-		case 3:
-			P8OUT |= 0x04;
-			break;
-		case 0:
-			P1OUT |= 0x01;
-			P8OUT |= 0x06;
-			break;
+	case 1:
+		P1OUT |= 0x01;
+		break;
+	case 2:
+		P8OUT |= 0x02;
+		break;
+	case 3:
+		P8OUT |= 0x04;
+		break;
+	case 0:
+		P1OUT |= 0x01;
+		P8OUT |= 0x06;
+		break;
 	}
 }
 
@@ -240,8 +207,12 @@ __interrupt void Timer_A2_ISR(void){
 		sec++;
 	}
 
-	ms_elapsed++;
+	msElapsed++;
 
-	//if()
+	if(buttonRead()== 2){
+		//		 stateFlag=1;
+		WDTCTL= 0x00;
+	}
+
 }
 

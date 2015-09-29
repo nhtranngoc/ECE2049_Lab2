@@ -35,25 +35,19 @@ int buttonRead(){
 	return 0;
 }
 
-//char buttonRead_char(){
-//	if (P1IN == BIT7) return "1";
-//	if (P2IN == BIT2) return "2";
-//	return "0";
-//}
-
 void LEDWrite(char state){
 	switch (state){
-		case 0x00:
-			P1OUT |= BIT0;
-			break;
-		case 0x01:
-			P8OUT |= BIT1;
-			break;
-		case 0x02:
-			P8OUT |= BIT2;
-			break;
-		default:
-			P1OUT= 0x00;
-			P8OUT= 0x00;
+	case 0x00:
+		P1OUT |= BIT0;
+		break;
+	case 0x01:
+		P8OUT |= BIT1;
+		break;
+	case 0x02:
+		P8OUT |= BIT2;
+		break;
+	default:
+		P1OUT= 0x00;
+		P8OUT= 0x00;
 	}
 }
