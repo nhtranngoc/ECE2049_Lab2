@@ -108,9 +108,6 @@ typedef uint8_t note;
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
-
-
-
 /* The number of milliseconds to kill the note before the duration expires.
  * This leaves a nice gap between back-to-back notes. */
 #define DEAD_TIME_MS 20
@@ -133,41 +130,16 @@ extern int total;
 extern char scoreStr[10];
 extern int percentage;
 
-//void ledOn(int noteKey);
-//void checkKeyPad(int noteKey);
-
-
 static void capLEDOn(int ledNum);
 static void capLEDOff();
 int checkButton();
-static void checkKeyPad(int keyPad, int dur);
+static void checkKeyPad(int keyPad);
 char* itoa(int i, char b[]);
-
-
-/*
- * Sets the tempo in BPM (beats per minute) at which the music will play back.
- */
 void setTickDur(unsigned int bpm);
-
-/*
- * Plays the passed note for the given duration (in ticks, see TICKS PER BEAT).
- * Blocks until the note is over.
- */
 void play(unsigned int note, unsigned int duration_ticks);
-
-/*
- * Rests for the given duration. Exactly the same as playing, except we just
- * don't play a note for the duration.
- */
 void rest(unsigned int duration_ticks);
 
 void playBuzzer(int freq);
-void playBuzzer2();
-void introSound();
-void clickSound();
-void swDelay(char numLoops);
 void BuzzerOff();
-void winSound();
-void loseSound();
 
 #endif /* SOUND_H_ */

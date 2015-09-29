@@ -15,30 +15,35 @@ volatile unsigned int msElapsed = 0;
 // The number of milliseconds per "tick" in the music (see TICKS_PER_BEAT).
 static unsigned int msPerTick = 0;
 
+/**
+ * @brief Sets the tempo in BPM (beats per minute) at which the music will play back.
+ * @param bpm Beats Per Minute set in sheet music.
+ */
 void setTickDur(unsigned int bpm) {
 	// Compute the number of ms per tick from the beats per minute.
 	msPerTick = 60000 / (TICKS_PER_BEAT * bpm);
 }
 
+/**
+ * @brief Plays a note for a set duration.
+ * @param note One of the defined notes (frequency).
+ * @param durationTick duration in terms of "tick".
+ */
 void play(unsigned int note, unsigned int durationTick) {
 	unsigned int durationMs = 0;
-
 	/* Compute the duration (in ms). */
-	duration_ms = durationTick * msPerTick;
-
+	durationMs = durationTick * msPerTick;
 	/* Set the current note. */
 	currentNote = note;
-
 	/* Reset the elapsed counter. */
 	msElapsed = 0;
 
 	/* Wait for the note duration to expire. */
 	while (msElapsed < durationMs - DEAD_TIME_MS){
 		playBuzzer(currentNote);
-		//@TODO define capLEDOn, checkKeyPad, score.
 		int enumNote = currentNote % 5; //Turns all notes to one of five positions- depending on its frequency.
 		capLEDOn(enumNote); //Turn on LED at that particular position.
-		checkKeyPad(enumNote, durationMs); //Returns 0 if doesn't hit right key press- Award some points otherwise.
+		checkKeyPad(enumNote); //Award some points if hit the right keypress.
 	}
 	GrClearDisplay(&g_sContext);
 	GrStringDrawCentered(&g_sContext, (itoa(score, scoreStr)), AUTO_STRING_LENGTH, 51, 30, TRANSPARENT_TEXT);
@@ -52,6 +57,12 @@ void play(unsigned int note, unsigned int durationTick) {
 	while (msElapsed < durationMs);
 }
 
+/**
+ * @brief Converts from integer to string.
+ * @param i Number to convert.
+ * @param b[] String of char .
+ * @return Pointer to created string.
+ */
 char* itoa(int i, char b[]){
 	char const digit[] = "0123456789";
 	char* p = b;
@@ -96,9 +107,11 @@ int checkButton(){
 	return -1;
 }
 
-
-static void checkKeyPad(int keyPad, int dur){
-	percentage = (score/total)*100;
+/**
+ *@brief Check for keypad while a note is playing.
+ *@param keyPad Number from 0 to 4 that indicates buttons.
+ */
+static void checkKeyPad(int keyPad){
 	if (keyPad == checkButton()){
 		P1OUT |= 0x01;
 		P8OUT |= 0x06;
@@ -107,6 +120,10 @@ static void checkKeyPad(int keyPad, int dur){
 	total += 10;
 }
 
+/**
+ * @brief Turns on capacitive LEDs.
+ * @param ledNum Number from 0 to 4 to indicate LEDs.
+ */
 static void capLEDOn(int ledNum){
 	capLEDOff();
 	switch(ledNum){
@@ -128,21 +145,25 @@ static void capLEDOn(int ledNum){
 	}
 }
 
+/**
+ * @brief Turns off cap LEDs.
+ */
 static void capLEDOff(){
 	P1OUT &= ~(BIT1|BIT2|BIT3|BIT4|BIT5);
 }
 
-void rest(unsigned int duration_ticks) {
-	unsigned int duration_ms = 0;
-
+/**
+ * @brief Rest for a bit.
+ * @param durationTick Duration to rest.
+ */
+void rest(unsigned int durationTick) {
+	unsigned int durationMs = 0;
 	/* Compute the duration (in ms). */
-	duration_ms = duration_ticks * msPerTick;
-
+	durationMs = durationTick * msPerTick;
 	/* Reset the elapsed counter. */
 	msElapsed = 0;
-
 	/* Wait for the rest duration to expire. */
-	while(msElapsed < duration_ms);
+	while(msElapsed < durationMs);
 }
 
 

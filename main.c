@@ -61,6 +61,7 @@ void main(void){
 		}
 		switch(state){
 		case WELCOME:
+			//Sets everything to 0.
 			stateFlag=0;
 			percentage=0;
 			score=0;
@@ -131,6 +132,10 @@ void main(void){
 	}
 }
 
+/**
+ * @brief Countdown from 3;
+ * @param sec Number from 3 to 0.
+ */
 void countdown(int sec){
 	//THIS IS NOT THE RIGHT WAY TO DO IT. (Oh well).
 	GrClearDisplay(&g_sContext);
@@ -210,8 +215,7 @@ __interrupt void Timer_A2_ISR(void){
 	msElapsed++;
 
 	if(buttonRead()== 2){
-		//		 stateFlag=1;
-		WDTCTL= 0x00;
+		WDTCTL= 0x00; //Write an invalid value to WDTCTL so that it resets the MSP430.
 	}
 
 }
